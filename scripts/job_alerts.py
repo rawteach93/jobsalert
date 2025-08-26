@@ -85,7 +85,7 @@ def scrape_company_leads():
 
         except RequestException as e:
             logging.error(f"Error scraping {site}: {e}")
-        time.sleep(2)  # Delay to avoid rate-limiting
+        time.sleep(2)
 
     return leads
 
