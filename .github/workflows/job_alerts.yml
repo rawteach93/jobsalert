@@ -26,11 +26,22 @@ jobs:
           pip install requests urllib3 beautifulsoup4
       - name: Verify environment variables
         run: |
-          echo "EMAIL_USER: $EMAIL_USER"
-          echo "EMAIL_RECEIVER: $EMAIL_RECEIVER"
-          if [ -z "$EMAIL_USER" ] || [ -z "$EMAIL_PASS" ] || [ -z "$EMAIL_RECEIVER" ]; then
-            echo "Error: One or more environment variables are missing"
+          echo "Checking environment variables..."
+          echo "EMAIL_USER: ${EMAIL_USER:-'Not set'}"
+          echo "EMAIL_PASS: ${EMAIL_PASS:-'Not set'}"
+          echo "EMAIL_RECEIVER: ${EMAIL_RECEIVER:-'Not set'}"
+          if [ -z "$EMAIL_USER" ]; then
+            echo "Error: EMAIL_USER is missing"
             exit 1
           fi
+          if [ -z "$EMAIL_PASS" ]; then
+            echo "Error: EMAIL_PASS is missing"
+            exit 1
+          fi
+          if [ -z "$EMAIL_RECEIVER" ]; then
+            echo "Error: EMAIL_RECEIVER is missing"
+            exit 1
+          fi
+          echo "All environment variables are set"
       - name: Run script
         run: python scripts/job_alerts.py
