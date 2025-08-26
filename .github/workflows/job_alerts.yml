@@ -1,28 +1,36 @@
-
-name: Daily Job Alerts
+name: Job Alerts
 
 on:
   schedule:
-    - cron: '0 8 * * *'  # Runs daily at 8:00 AM UTC
-  workflow_dispatch:    # Allow manual trigger
+    - cron: '0 0 * * *'  # Runs daily at midnight
+  workflow_dispatch:
 
 jobs:
   run-job-alerts:
     runs-on: ubuntu-latest
+    env:
+      EMAIL_USER: ${{ secrets.EMAIL_USER }}
+      EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+      EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+      ACTIONS_STEP_DEBUG: true  # Enable debug logging
     steps:
-      - uses: actions/checkout@v4
-
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
-
+          python-version: '3.10'
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run Job Alerts script
-        env:
-          GMAIL_USER: ${{ secrets.GMAIL_USER }}
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests urllib3 beautifulsoup4
+      - name: Verify environment variables
+        run: |
+          echo "EMAIL_USER: $EMAIL_USER"
+          echo "EMAIL_RECEIVER: $EMAIL_RECEIVER"
+          if [ -z "$EMAIL_USER" ] || [ -z "$EMAIL_PASS" ] || [ -z "$EMAIL_RECEIVER" ]; then
+            echo "Error: One or more environment variables are missing"
+            exit 1
+          fi
+      - name: Run script
         run: python scripts/job_alerts.py
